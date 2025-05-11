@@ -1,0 +1,136 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+  <h1 class="text-2xl font-bold">
+    AI Scenario Generator – Visual-First Creative Prompting
+  </h1>
+  <p class="py-4">
+    Bring your AI-generated images and videos to life with precise, visually
+    rich scenarios. This prompt framework is designed to help you create
+    stunning visual storytelling for image generation, video production, and
+    image-to-video transitions. It emphasizes purely visual descriptions,
+    ensuring your outputs capture the essence of each scene without drifting
+    into abstract or non-visual territory. <br />
+    <br />
+
+    Whether you're crafting a single frame, dynamic sequence, or cinematic
+    masterpiece, this prompt helps guide your AI with clarity and style, making
+    your creative visions a reality.
+  </p>
+  <form id="scenario-form" class="space-y-4">
+    <div>
+      <label for="scenario_type">Scenario Type:</label>
+      <select
+        id="scenario_type"
+        name="scenario_type"
+        required
+        class="w-full p-2 border rounded"
+      >
+        <option value="normal">Normal</option>
+        <option value="t2i">Text to Image (t2i)</option>
+        <option value="t2v">Text to Video (t2v)</option>
+        <option value="i2v">Image to Video (i2v)</option>
+        <option value="wan">WAN</option>
+      </select>
+    </div>
+    <div>
+      <label for="output_type">Output Format:</label>
+      <select
+        id="output_type"
+        name="output_type"
+        required
+        class="w-full p-2 border rounded"
+      >
+        <option value="normal">Normal</option>
+        <option value="tag">Tag</option>
+      </select>
+    </div>
+    <div>
+      <label for="max_tokens">Max Tokens:</label>
+      <input
+        type="number"
+        id="max_tokens"
+        name="max_tokens"
+        required
+        class="w-full p-2 border rounded"
+      />
+    </div>
+    <div>
+      <label for="min_tokens">Min Tokens:</label>
+      <input
+        type="number"
+        id="min_tokens"
+        name="min_tokens"
+        required
+        class="w-full p-2 border rounded"
+      />
+    </div>
+    <div>
+      <label for="scenario">Scenario Description:</label>
+      <textarea
+        id="scenario"
+        name="scenario"
+        required
+        class="w-full p-2 border rounded"></textarea>
+    </div>
+    <button
+      id="generate-button"
+      type="submit"
+      class="px-4 py-2 bg-blue-600 text-white rounded"
+    >
+      Generate Scenario
+    </button>
+  </form>
+  <!-- Spinner -->
+  <div
+    id="loading-spinner"
+    class="hidden fixed inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center z-50"
+  >
+    <div class="spinner"></div>
+  </div>
+
+  <div id="result" class="mt-8 bg-white p-4 rounded shadow hidden">
+    <h2 class="text-lg font-bold">Generated Scenario:</h2>
+    <p id="scenario-output"></p>
+  </div>
+
+  <script>
+    const form = document.getElementById("scenario-form");
+    const spinner = document.getElementById("loading-spinner");
+    const generateButton = document.getElementById("generate-button");
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      // Show the spinner
+      spinner.classList.remove("hidden");
+      generateButton.disabled = true;
+      generateButton.textContent = "Generating...";
+
+      try {
+        const formData = new FormData(event.target);
+        const data = Object.fromEntries(formData.entries());
+
+        const response = await fetch("/api/generate", {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: { "Content-Type": "application/json" },
+        });
+
+        const result = await response.json();
+        document.getElementById("scenario-output").textContent = result.output;
+        document.getElementById("result").classList.remove("hidden");
+      } catch (error) {
+        alert("Error generating scenario. Please try again.");
+        console.error(error);
+      } finally {
+        // Hide the spinner
+        spinner.classList.add("hidden");
+        generateButton.disabled = false;
+        generateButton.textContent = "Generate Scenario";
+      }
+    });
+  </script>
+</Layout>
